@@ -41,8 +41,8 @@ router.get(
 router.get(
     '/github/callback',
     passport.authenticate('github', {
-        successRedirect: 'http://localhost:5173',
-        failureRedirect: 'http://localhost:5173/login/failed'
+        successRedirect: process.env.CLIENT_URL || 'http://localhost:5173',
+        failureRedirect: (process.env.CLIENT_URL || 'http://localhost:5173') + '/login/failed'
     })
 )
 
