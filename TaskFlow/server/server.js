@@ -11,14 +11,34 @@ import { GitHub } from './config/auth.js'
 
 const app = express()
 
+app.set('trust proxy', 1) // Trust first proxy
+
 app.use(session({
     secret: 'codepath',
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: false,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        httpOnly: true
+    }
 }))
 app.use(express.json())
+
+const allowedOrigins = [
+    'https://taskflow-client-81p8.onrender.com',
+    'http://localhost:5173'
+]
+
 app.use(cors({
-    origin: 'https://taskflow-client-81p8.onrender.com',
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true)
+        } else {
+            callback(new Error('Not allowed by CORS'))
+        }
+    },
     methods: 'GET,POST,PUT,DELETE,PATCH',
     credentials: true
 }))
